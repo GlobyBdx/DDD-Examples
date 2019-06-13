@@ -1,0 +1,93 @@
+package fr.ubordeaux.ddd.cargoshippingsystem.infrastructure.persistence.inmemory;
+
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
+import fr.ubordeaux.ddd.cargoshippingsystem.domain.model.HandlingEvent;
+import fr.ubordeaux.ddd.cargoshippingsystem.domain.model.HandlingEventRepository;
+import fr.ubordeaux.ddd.cargoshippingsystem.domain.type.CargoTrackingID;
+import fr.ubordeaux.ddd.cargoshippingsystem.domain.type.EventType;
+import fr.ubordeaux.ddd.cargoshippingsystem.domain.type.ScheduleID;
+
+/**
+ * Repository implementation
+ * 
+ */
+
+public class HandlingEventRepositoryImplementation extends HandlingEventRepository {
+	private Set<HandlingEvent> handlingEvents;
+
+	public HandlingEventRepositoryImplementation() {
+		this.handlingEvents = new HashSet<>();
+	}
+
+	@Override
+	public void store(HandlingEvent handlingEvent) {
+		if (this.findAll().contains(handlingEvent)) {
+			this.handlingEvents.remove(handlingEvent);
+		}
+		this.handlingEvents.add(handlingEvent);
+	}
+
+	@Override
+	public Set<HandlingEvent> findAll() {
+		return this.handlingEvents;
+	}
+
+	@Override
+	public Set<HandlingEvent> findByCargoTrackingID(CargoTrackingID cargoTrackingID) {
+		Set<HandlingEvent> handlingEvents = new HashSet<>();
+		for (HandlingEvent handlingEvent : this.findAll()) {
+			if (handlingEvent.getCargoTrackingID().equals(cargoTrackingID)) {
+				handlingEvents.add(handlingEvent);
+			}
+		}
+		return handlingEvents;
+	}
+
+	@Override
+	public Set<HandlingEvent> findByCargoTrackingIDType(CargoTrackingID cargoTrackingID, EventType eventType) {
+		Set<HandlingEvent> handlingEvents = new HashSet<>();
+		for (HandlingEvent handlingEvent : this.findAll()) {
+			if (handlingEvent.getCargoTrackingID().equals(cargoTrackingID)
+					&& handlingEvent.getEventType().equals(eventType)) {
+				handlingEvents.add(handlingEvent);
+			}
+		}
+		return handlingEvents;
+	}
+
+	@Override
+	public HandlingEvent findMostRecentByCargoTrackingIDType(CargoTrackingID cargoTrackingID, EventType type) {
+		HandlingEvent event = null;
+		for (HandlingEvent handlingEvent : this.findAll()) {
+			if (event == null || handlingEvent.getCompletionTime().after(event.getCompletionTime())) {
+				event = handlingEvent;
+			}
+		}
+		return event;
+	}
+
+	@Override
+	public HandlingEvent findByCargoTrackingIDCompletionTimeType(CargoTrackingID cargoTrackingID, Date completionTime, EventType eventType) {
+		for (HandlingEvent handlingEvent : this.findAll()) {
+			if (handlingEvent.getCargoTrackingID().equals(cargoTrackingID)
+					&& handlingEvent.getCompletionTime().equals(completionTime)
+					&& handlingEvent.getEventType().equals(eventType)) {
+				return handlingEvent;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public HandlingEvent findByScheduleID(ScheduleID scheduleID) {
+		for (HandlingEvent handlingEvent : this.findAll()) {
+			if (handlingEvent.getScheduleID().equals(scheduleID)) {
+				return handlingEvent;
+			}
+		}
+		return null;
+	}
+}

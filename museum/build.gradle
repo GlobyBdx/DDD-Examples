@@ -1,0 +1,25 @@
+apply plugin: 'java'
+
+group = 'fr.ubordeaux.ddd'
+version = '1.0-SNAPSHOT'
+
+description = """DDD Museum Example"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+  testCompile 'junit:junit:4.12'
+}
+
+apply plugin: 'application'
+mainClassName = "fr.ubordeaux.ao.gallerymanagement.userinterface.CommandLine"
+
+run {
+   standardInput = System.in
+}
